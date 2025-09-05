@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import RichTextEditor from "./RichTextEditor";
 import { Checkbox, DatePicker, Form, Button, Radio } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { DoubleRightOutlined } from "@ant-design/icons";
+import {
+  DollarCircleOutlined,
+  DoubleRightOutlined,
+  SettingOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 
 const ProcedureInfo = ({ onFinish }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -10,9 +15,30 @@ const ProcedureInfo = ({ onFinish }) => {
     console.log("Form submitted:", values);
   };
   const radioOptions = [
-    { value: "Financial", label: "Financial" },
-    { value: "Critical", label: "Critical" },
-    { value: "Operational", label: "Operational" },
+    {
+      value: "Financial",
+      label: (
+        <span className="flex gap-1 text-[#16a34a] md:text-lg text-xs">
+          <DollarCircleOutlined /> Financial
+        </span>
+      ),
+    },
+    {
+      value: "Critical",
+      label: (
+        <span className="flex gap-1 text-[#dc2626] md:text-lg text-xs">
+          <WarningOutlined /> Critical
+        </span>
+      ),
+    },
+    {
+      value: "Operational",
+      label: (
+        <span className="flex gap-1 text-[#2563eb] md:text-lg text-xs">
+          <SettingOutlined /> Operational
+        </span>
+      ),
+    },
   ];
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -31,7 +57,7 @@ const ProcedureInfo = ({ onFinish }) => {
         {/* -------- Purposes -------- */}
         <div className="w-full">
           <h2 className="text-xl font-bold mb-3">Purpose</h2>
-          <div className="flex flex-col md:flex-row w-full md:w-[90%] gap-4">
+          <div className="flex flex-col md:flex-row w-full md:w-[90%] md:gap-5">
             <Form.Item
               name="procedureInfoText"
               rules={[
@@ -52,10 +78,11 @@ const ProcedureInfo = ({ onFinish }) => {
               ]}
             >
               <Radio.Group
+                size="small"
                 style={{
                   display: "flex",
                   flexDirection: isMobile ? "row" : "column",
-                  gap: "1rem",
+                  gap: isMobile ? 2 : 5,
                   marginTop: isMobile ? 3 : 42,
                 }}
                 options={radioOptions}
@@ -67,7 +94,7 @@ const ProcedureInfo = ({ onFinish }) => {
         {/* -------- Scope -------- */}
         <div className="w-full">
           <h2 className="text-xl font-bold mb-3">Scope</h2>
-          <div className="flex flex-col md:flex-row w-full md:w-[90%] gap-4">
+          <div className="flex flex-col md:flex-row w-full md:w-[90%] md:gap-5">
             <Form.Item
               name="scope"
               rules={[{ required: true, message: "Please enter scope" }]}
@@ -99,27 +126,29 @@ const ProcedureInfo = ({ onFinish }) => {
         </div>
 
         {/* -------- When to Execute -------- */}
-        <div className="flex flex-col md:flex-row w-full gap-5">
-          <Form.Item
-            label={
-              <span className="text-xl font-bold mb-3">When to execute</span>
-            }
-            style={{ width: "100%" }}
-            name="executionDate"
-            rules={[{ required: true, message: "Please select a date" }]}
-          >
-            <TextArea rows={4} placeholder="Enter when to execute here..." />
-          </Form.Item>
+        <Form.Item
+          label={
+            <span className="text-xl font-bold mb-3">When to execute</span>
+          }
+          style={{ width: "100%" }}
+          name="executionDate"
+          rules={[{ required: true, message: "Please select a date" }]}
+          getValueFromEvent={(val) => val}
+          initialValue={[{ type: "paragraph", children: [{ text: "" }] }]}
+        >
+          <RichTextEditor />
+        </Form.Item>
 
-          <Form.Item
-            name="instructions"
-            style={{ width: "100%" }}
-            label={<span className="text-xl font-bold mb-3">Instructions</span>}
-            rules={[{ required: true, message: "Please enter instructions" }]}
-          >
-            <TextArea rows={4} placeholder="Enter instructions here..." />
-          </Form.Item>
-        </div>
+        <Form.Item
+          name="instructions"
+          style={{ width: "100%" }}
+          label={<span className="text-xl font-bold mb-3">Instructions</span>}
+          rules={[{ required: true, message: "Please enter instructions" }]}
+          getValueFromEvent={(val) => val}
+          initialValue={[{ type: "paragraph", children: [{ text: "" }] }]}
+        >
+          <RichTextEditor />
+        </Form.Item>
 
         <Form.Item>
           <Button
