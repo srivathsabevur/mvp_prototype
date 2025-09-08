@@ -21,11 +21,11 @@ const Navbar = ({ handleSideBarToggle }) => {
   return (
     <nav
       className="fixed sm:static top-0 left-0 right-0 sm:left-auto
-                        flex justify-between w-full sm:w-auto
+                        flex justify-between w-full sm:w-auto md:h-20 h-16
                         bg-[#051A2E] z-50 p-1 border-b border-black/10"
     >
       <img
-        className="w-[100px]"
+        className="md:w-[180px] w-[120px]"
         src={`https://hxplabs.com/wp-content/uploads/2025/07/fulllogo_transparent_nobuffer.png`}
         alt="logo"
       />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import ViewAllProcedures from "../components/ViewAllProcedures";
-import CreateProcedure from "../components/CreateProcedure";
-import SetupTemplate from "../components/SetupTemplate";
+import ViewAllProcedures from "./ViewAllProcedures";
+import CreateProcedure from "./CreateProcedure";
+import SetupTemplate from "./SetupTemplate";
 
 const ProcedureCompanion = () => {
   const [option, setOption] = useState("viewAllProcedures");

@@ -1,9 +1,9 @@
 import { Button, FloatButton } from "antd";
 import React, { useRef, useState } from "react";
-import ActionCompanion from "./ActionCompanion";
-import ProcedureCompanion from "./ProcedureCompanion";
-import LogbookCompanion from "./LogbookCompanion";
-import ChecklistCompanion from "./ChecklistCompanion";
+import ActionCompanion from "./ActionCompanion/ActionCompanion";
+import ProcedureCompanion from "./ProcedureCompanion/ProcedureCompanion";
+import LogbookCompanion from "./LogbookCompanion/LogbookCompanion";
+import ChecklistCompanion from "./ChecklistCompanion/ChecklistCompanion";
 import Navbar from "../components/Navbar";
 import {
   BookOutlined,
@@ -14,6 +14,7 @@ import {
 
 const Dashboard = () => {
   const [option, setOption] = useState("actionCompanion");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const sideBarRef = useRef(null);
 
   const dashboardOptions = [
@@ -41,6 +42,7 @@ const Dashboard = () => {
 
   const handleButtonClick = (e) => {
     const { name } = e.target;
+    setIsSidebarOpen(!isSidebarOpen);
     setOption(name);
   };
 
@@ -63,25 +65,27 @@ const Dashboard = () => {
         console.log("Invalid Case");
         break;
     }
+
     return curOption;
   };
 
-  const handleSideBarToggle = (e) => {
-    if (sideBarRef.current) {
-      sideBarRef.current.classList.toggle("-translate-x-full");
-      sideBarRef.current.classList.toggle("translate-x-0");
-    }
-  };
+  // const handleSideBarToggle = (e) => {
+  //   if (sideBarRef.current) {
+  //     sideBarRef.current.classList.toggle("-translate-x-full");
+  //     sideBarRef.current.classList.toggle("translate-x-0");
+  //   }
+  // };
+
+  const handleSideBarToggle = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <div className="relative sm:flex w-screen h-screen">
       {/* Sidebar */}
       <div
         ref={sideBarRef}
-        className="fixed sm:static sm:translate-x-0 -translate-x-full 
-                   transition-transform duration-500
-                   sm:flex sm:flex-col w-[350px] h-full 
-                   border border-black/10 bg-[#051A2E] p-3 z-100"
+        className={`fixed sm:static sm:translate-x-0 transition-transform duration-500 sm:flex sm:flex-col w-64 h-full border border-black/10 bg-[#051A2E] p-3 z-100 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex flex-col justify-center items-center">
           <img
@@ -104,7 +108,6 @@ const Dashboard = () => {
                     : "flex justify-start items-center gap-2 text-[#FF9933] px-2 py-1 text-start rounded-lg font-medium cursor-pointer transform translate-all ease-in duration-150 hover:bg-[#FF9933] hover:text-white"
                 } text-lg w-full`}
               >
-                {" "}
                 {btn.icon}
                 {btn.value}
               </button>

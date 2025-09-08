@@ -84,7 +84,7 @@ const ViewAllProcedures = ({ setOption }) => {
       <div className="md:flex w-full gap-2">
         <input
           type="text"
-          className="md:w-[60%] bg-white w-full border p-2 border-black/10 focus:outline-none rounded-lg"
+          className="md:w-[70%] bg-white w-full border p-2 border-black/10 focus:outline-none rounded-lg"
           value={searchKeyWord}
           onChange={handleSearch}
           placeholder="Search"
