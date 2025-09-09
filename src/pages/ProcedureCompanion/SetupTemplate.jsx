@@ -1,14 +1,9 @@
-import {
-  ArrowLeftOutlined,
-  PlusOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
+import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Select, Space, Upload } from "antd";
 import React, { useState } from "react";
 import RichTextEditor from "../../components/RichTextEditor";
-import Sites from "../../components/ProcedureCompanionComponents/Sites";
-import Rules from "../../components/ProcedureCompanionComponents/Rules";
-import LogoUpload from "../../components/LogoUpload";
+import Sites from "../../components/ProcedureCompanionComponents/SetupTemplate/Sites";
+import LogoUpload from "../../components/ProcedureCompanionComponents/SetupTemplate/LogoUpload";
 
 const SetupTemplate = ({ setOption }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -68,7 +63,9 @@ const SetupTemplate = ({ setOption }) => {
   return (
     <div className="flex flex-col w-full h-full p-3 bg-gray-100">
       <div className="flex justify-between items-center">
-        <h1 className="text-lg md:text-3xl font-semibold">Setup Template</h1>
+        <h1 className="text-xl ml-2 md:text-3xl font-semibold">
+          Setup Template
+        </h1>
         <Button
           onClick={() => setOption("viewAllProcedures")}
           type="primary"

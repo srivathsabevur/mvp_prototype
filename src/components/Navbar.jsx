@@ -1,9 +1,9 @@
-import { UserOutlined } from "@ant-design/icons";
+import { CloseOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Dropdown } from "antd";
 import React from "react";
 import { MenuOutlined } from "@ant-design/icons";
 
-const Navbar = ({ handleSideBarToggle }) => {
+const Navbar = ({ handleSideBarToggle, isSidebarOpen = false }) => {
   const items = [
     {
       key: 1,
@@ -41,7 +41,13 @@ const Navbar = ({ handleSideBarToggle }) => {
           <Button
             size="large"
             type="primary"
-            icon={<MenuOutlined className="text-2xl" />}
+            icon={
+              isSidebarOpen ? (
+                <CloseOutlined className="text-2xl" />
+              ) : (
+                <MenuOutlined className="text-2xl" />
+              )
+            }
             onClick={handleSideBarToggle}
           />
         </div>

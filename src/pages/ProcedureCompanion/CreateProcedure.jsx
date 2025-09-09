@@ -1,10 +1,12 @@
 import { Button, message, Tabs } from "antd";
 import React, { useState } from "react";
-import ProcedureMetaData from "../../components/ProcedureMetaData.jsx";
-import ProcedureInfo from "../../components/ProcedureInfo.jsx";
+
 import { ErrorBoundary } from "react-error-boundary";
-import Tasks from "../../components/Tasks.jsx";
+
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import ProcedureMetaData from "../../components/ProcedureCompanionComponents/CreateProcedure/ProcedureMetaData";
+import ProcedureInfo from "../../components/ProcedureCompanionComponents/CreateProcedure/ProcedureInfo";
+import Tasks from "../../components/ProcedureCompanionComponents/CreateProcedure/Tasks";
 
 const CreateProcedure = ({ setOption }) => {
   const fallback = <div>Something went wrong</div>;

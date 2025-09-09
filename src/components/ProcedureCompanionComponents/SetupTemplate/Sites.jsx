@@ -212,9 +212,7 @@ const Sites = () => {
         >
           <div className="my-3">
             <div className="flex w-full justify-between items-center mb-2 px-1">
-              <span className="text-xl font-bold">
-                Site {siteIndex + 1} {site.site && `- ${site.site}`}
-              </span>
+              <span className="text-xl font-bold">Site {siteIndex + 1}</span>
               <Button
                 icon={
                   site.isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import RichTextEditor from "./RichTextEditor";
+import RichTextEditor from "../../RichTextEditor";
 import { Checkbox, DatePicker, Form, Button, Radio } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import {

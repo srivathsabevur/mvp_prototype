@@ -33,7 +33,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import RichTextEditor from "./RichTextEditor";
+import RichTextEditor from "../../RichTextEditor";
 
 const { TextArea } = Input;
 
