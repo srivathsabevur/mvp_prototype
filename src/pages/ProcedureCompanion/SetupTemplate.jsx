@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import RichTextEditor from "../../components/RichTextEditor";
 import Sites from "../../components/ProcedureCompanionComponents/SetupTemplate/Sites";
 import LogoUpload from "../../components/ProcedureCompanionComponents/SetupTemplate/LogoUpload";
+import TextArea from "antd/es/input/TextArea";
 
 const SetupTemplate = ({ setOption }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -156,16 +157,9 @@ const SetupTemplate = ({ setOption }) => {
             <Form.Item
               label={<span className="text-xl font-bold">Rules</span>}
               name="rules"
-              valuePropName="value"
-              getValueFromEvent={(val) => val}
-              initialValue={[
-                {
-                  type: "paragraph",
-                  children: [{ text: "Start writing here..." }],
-                },
-              ]}
             >
-              <RichTextEditor placeholder="Enter rules here..." />
+              {/* <RichTextEditor placeholder="Enter rules here..." /> */}
+              <TextArea rows={5} placeholder="Enter rules here..." />
             </Form.Item>
           </div>
           <Button icon={<SaveOutlined />} type="primary" htmlType="submit">
