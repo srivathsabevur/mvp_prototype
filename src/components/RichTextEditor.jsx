@@ -170,6 +170,7 @@ const RichTextEditor = ({
             borderRadius: "8px",
             padding: "10px",
             minHeight: "150px",
+            backgroundColor:"white"
           }}
           onKeyDown={(event) => {
             // example: ctrl+b = bold
