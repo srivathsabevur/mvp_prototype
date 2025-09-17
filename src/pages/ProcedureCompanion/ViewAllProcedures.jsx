@@ -136,7 +136,7 @@ const ViewAllProcedures = ({ setOption }) => {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-5 w-full overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-5 w-full overflow-y-auto">
           {filterData.map((value, index) => {
             {
               /* return (

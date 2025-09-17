@@ -39,11 +39,6 @@ const ActionCompanion = () => {
     },
   ];
 
-  const gridStyle = {
-    width: "50%",
-    textAlign: "center",
-  };
-
   return (
     <div className="flex flex-col w-full h-full p-3 bg-gray-50">
       <div className="pr-1 flex w-full justify-end items-end">
@@ -70,7 +65,7 @@ const ActionCompanion = () => {
         </div>
       ) : (
         <div
-          className={`w-[100%] grid grid-cols-1 md:grid-cols-4  gap-6 mt-5 overflow-y-auto p-2`}
+          className={`w-[100%] grid grid-cols-1 md:grid-cols-3  gap-6 mt-5 overflow-y-auto p-2`}
         >
           {data.length === 0 ? (
             <>
