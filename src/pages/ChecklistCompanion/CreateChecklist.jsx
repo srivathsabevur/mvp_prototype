@@ -15,7 +15,7 @@ const CreateChecklist = ({ setOption }) => {
   const items = [
     {
       key: "1",
-      label: "Metadata",
+      label: "Description",
       children: (
         <ErrorBoundary fallback={fallback}>
           <Metadata />

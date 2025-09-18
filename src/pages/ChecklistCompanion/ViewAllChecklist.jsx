@@ -23,7 +23,7 @@ const ViewAllChecklist = ({ setOption }) => {
             className="btn-primary text-sm flex justify-center items-center gap-2 "
           >
             <PlusOutlined />
-            Create Checklist
+            Create Checklist & Metadata
           </button>
         </div>
       </div>

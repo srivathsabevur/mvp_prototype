@@ -12,9 +12,9 @@ import {
   Radio,
   InputNumber,
   Empty,
+  Switch,
 } from "antd";
 import React, { useState } from "react";
-
 const { Option } = Select;
 
 const Questions = () => {
@@ -22,7 +22,7 @@ const Questions = () => {
   const [openModal, setOpenModal] = useState(false);
   const [form] = Form.useForm();
 
-  // Mock sections data - replace with your actual sections
+  // Mock sections data
   const sections = [
     { sectionId: "1", sectionName: "General Information" },
     { sectionId: "2", sectionName: "Technical Skills" },
@@ -37,19 +37,25 @@ const Questions = () => {
           questionId: crypto.randomUUID(),
           sectionId: values.sectionId,
           question: values.question,
-          subQuestions:
-            values.subQuestions?.map((subQ) => ({
-              subQuestionId: crypto.randomUUID(),
-              subQuestion: subQ.subQuestion,
-              responseType: subQ.responseType,
-              responses:
-                subQ.responseType === "single"
-                  ? [subQ.singleResponse || ""]
-                  : subQ.multipleResponses || [],
-            })) || [],
+          isHeading: values.isHeading,
+          responseType: values.responseType,
+          responses:
+            values.responseType === "single"
+              ? [values.singleResponse || ""]
+              : values.multipleResponses || [],
+          subQuestions: values.isHeading
+            ? values.subQuestions?.map((subQ) => ({
+                subQuestionId: crypto.randomUUID(),
+                subQuestion: subQ.subQuestion,
+                responseType: subQ.responseType,
+                responses:
+                  subQ.responseType === "single"
+                    ? [subQ.singleResponse || ""]
+                    : subQ.multipleResponses || [],
+              })) || []
+            : [],
         };
-
-        setQuestions([...questions, newQuestion]);
+        setQuestions((prev) => [...prev, newQuestion]);
         form.resetFields();
         setOpenModal(false);
       })
@@ -61,44 +67,6 @@ const Questions = () => {
   const handleCancel = () => {
     form.resetFields();
     setOpenModal(false);
-  };
-
-  const renderResponseFields = (fieldName, responseType, responseCount) => {
-    if (responseType === "single") {
-      return (
-        <Form.Item
-          name={[fieldName, "singleResponse"]}
-          label="Response"
-          rules={[{ required: true, message: "Response is required" }]}
-        >
-          <Input placeholder="Enter response" />
-        </Form.Item>
-      );
-    } else if (responseType === "multiple" && responseCount > 0) {
-      return (
-        <div className="ml-4">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Responses ({responseCount})
-          </label>
-          {Array.from({ length: responseCount }, (_, index) => (
-            <Form.Item
-              key={`${fieldName}-${index}`}
-              name={[fieldName, "multipleResponses", index]}
-              rules={[
-                {
-                  required: true,
-                  message: `Response ${index + 1} is required`,
-                },
-              ]}
-              className="mb-2"
-            >
-              <Input placeholder={`Response ${index + 1}`} />
-            </Form.Item>
-          ))}
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -139,20 +107,21 @@ const Questions = () => {
                     danger
                     icon={<DeleteOutlined />}
                     onClick={() => {
-                      setQuestions(
-                        questions.filter(
-                          (q) => q.questionId !== question.questionId
-                        )
+                      setQuestions((prev) =>
+                        prev.filter((q) => q.questionId !== question.questionId)
                       );
                     }}
                   />
                 </div>
-
                 <div className="pr-12">
+                  {question.isHeading && (
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded mb-2 inline-block">
+                      Heading Question
+                    </span>
+                  )}
                   <h2 className="text-lg font-medium mb-2 truncate">
                     {question.question}
                   </h2>
-
                   <div className="text-sm text-gray-500 mb-3">
                     Section:{" "}
                     {
@@ -160,8 +129,12 @@ const Questions = () => {
                         ?.sectionName
                     }
                   </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    Response Type: {question.responseType} | Responses:{" "}
+                    {question.responses.length}
+                  </div>
 
-                  {question.subQuestions.length > 0 && (
+                  {question.isHeading && question.subQuestions.length > 0 && (
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium text-gray-700">
                         Sub Questions:
@@ -201,6 +174,9 @@ const Questions = () => {
           form={form}
           layout="vertical"
           initialValues={{
+            isHeading: false,
+            responseType: "single",
+            responseCount: 1,
             subQuestions: [
               {
                 subQuestion: "",
@@ -226,138 +202,292 @@ const Questions = () => {
 
           <Form.Item
             name="question"
-            label={<span className="text-lg font-bold">Question Heading</span>}
-            rules={[
-              { required: true, message: "Question heading is required" },
-            ]}
+            label={<span className="text-lg font-bold">Question</span>}
+            rules={[{ required: true, message: "Question is required" }]}
           >
-            <Input placeholder="Enter main question" size="large" />
+            <Input placeholder="Enter question" size="large" />
           </Form.Item>
 
-          <div className="text-lg font-bold mb-4">Sub Questions</div>
+          <Form.Item
+            name="responseType"
+            label="Response Type"
+            rules={[{ required: true, message: "Response type is required" }]}
+          >
+            <Radio.Group>
+              <Radio value="single">Single Response</Radio>
+              <Radio value="multiple">Multiple Responses</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-          <Form.List name="subQuestions">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <div
-                    key={key}
-                    className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50"
+          {/* Main question responses */}
+          <Form.Item noStyle dependencies={["responseType"]}>
+            {({ getFieldValue }) => {
+              const responseType = getFieldValue("responseType");
+
+              if (responseType === "single") {
+                return (
+                  <Form.Item
+                    name="singleResponse"
+                    label="Response"
+                    rules={[
+                      { required: true, message: "Response is required" },
+                    ]}
                   >
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="font-medium">
-                        Sub Question {name + 1}
-                      </span>
-                      {fields.length > 1 && (
-                        <Button
-                          type="text"
-                          danger
-                          icon={<MinusCircleOutlined />}
-                          onClick={() => remove(name)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
+                    <Input placeholder="Enter response" />
+                  </Form.Item>
+                );
+              }
 
-                    <Form.Item
-                      {...restField}
-                      name={[name, "subQuestion"]}
-                      rules={[
-                        { required: true, message: "Sub question is required" },
-                      ]}
-                    >
-                      <Input placeholder="Enter sub question" />
-                    </Form.Item>
+              return (
+                <>
+                  <Form.Item
+                    name="responseCount"
+                    label="Number of Responses"
+                    rules={[
+                      { required: true, message: "Response count is required" },
+                    ]}
+                  >
+                    <InputNumber
+                      min={1}
+                      max={10}
+                      placeholder="Enter count"
+                      className="w-full"
+                    />
+                  </Form.Item>
 
-                    <Form.Item
-                      {...restField}
-                      name={[name, "responseType"]}
-                      label="Response Type"
-                      initialValue="single"
-                    >
-                      <Radio.Group>
-                        <Radio value="single">Single Response</Radio>
-                        <Radio value="multiple">Multiple Responses</Radio>
-                      </Radio.Group>
-                    </Form.Item>
+                  <Form.Item noStyle dependencies={["responseCount"]}>
+                    {({ getFieldValue }) => {
+                      const responseCount = getFieldValue("responseCount") || 1;
+                      return (
+                        <div className="ml-4">
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Responses ({responseCount})
+                          </label>
+                          {Array.from({ length: responseCount }, (_, index) => (
+                            <Form.Item
+                              key={`main-response-${index}`}
+                              name={["multipleResponses", index]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: `Response ${index + 1} is required`,
+                                },
+                              ]}
+                              className="mb-2"
+                            >
+                              <Input placeholder={`Response ${index + 1}`} />
+                            </Form.Item>
+                          ))}
+                        </div>
+                      );
+                    }}
+                  </Form.Item>
+                </>
+              );
+            }}
+          </Form.Item>
 
-                    <Form.Item
-                      shouldUpdate={(prevValues, curValues) =>
-                        prevValues.subQuestions?.[name]?.responseType !==
-                          curValues.subQuestions?.[name]?.responseType ||
-                        prevValues.subQuestions?.[name]?.responseCount !==
-                          curValues.subQuestions?.[name]?.responseCount
-                      }
-                    >
-                      {({ getFieldValue }) => {
-                        const responseType = getFieldValue([
-                          "subQuestions",
-                          name,
-                          "responseType",
-                        ]);
-                        const responseCount =
-                          getFieldValue([
-                            "subQuestions",
-                            name,
-                            "responseCount",
-                          ]) || 1;
+          <Form.Item
+            name="isHeading"
+            label="Heading Question"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
 
-                        if (responseType === "multiple") {
-                          return (
-                            <>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "responseCount"]}
-                                label="Number of Responses"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Response count is required",
-                                  },
-                                ]}
-                              >
-                                <InputNumber
-                                  min={1}
-                                  max={10}
-                                  placeholder="Enter count"
-                                  className="w-full"
-                                />
-                              </Form.Item>
-                              {renderResponseFields(
-                                name,
-                                responseType,
-                                responseCount
+          {/* Sub-questions */}
+          <Form.Item noStyle dependencies={["isHeading"]}>
+            {({ getFieldValue }) =>
+              getFieldValue("isHeading") && (
+                <>
+                  <div className="text-lg font-bold mb-4">Sub Questions</div>
+                  <Form.List name="subQuestions">
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <div
+                            key={key}
+                            className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50"
+                          >
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="font-medium">
+                                Sub Question {name + 1}
+                              </span>
+                              {fields.length > 1 && (
+                                <Button
+                                  type="text"
+                                  danger
+                                  icon={<MinusCircleOutlined />}
+                                  onClick={() => remove(name)}
+                                >
+                                  Remove
+                                </Button>
                               )}
-                            </>
-                          );
-                        }
+                            </div>
 
-                        return renderResponseFields(
-                          name,
-                          responseType,
-                          responseCount
-                        );
-                      }}
-                    </Form.Item>
-                  </div>
-                ))}
+                            <Form.Item
+                              {...restField}
+                              name={[name, "subQuestion"]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Sub question is required",
+                                },
+                              ]}
+                            >
+                              <Input placeholder="Enter sub question" />
+                            </Form.Item>
 
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() =>
-                      add({ responseType: "single", responseCount: 1 })
-                    }
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add Sub Question
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "responseType"]}
+                              label="Response Type"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Response type is required",
+                                },
+                              ]}
+                            >
+                              <Radio.Group>
+                                <Radio value="single">Single Response</Radio>
+                                <Radio value="multiple">
+                                  Multiple Responses
+                                </Radio>
+                              </Radio.Group>
+                            </Form.Item>
+
+                            {/* Sub-question responses */}
+                            <Form.Item
+                              noStyle
+                              dependencies={[
+                                ["subQuestions", name, "responseType"],
+                              ]}
+                            >
+                              {({ getFieldValue }) => {
+                                const responseType = getFieldValue([
+                                  "subQuestions",
+                                  name,
+                                  "responseType",
+                                ]);
+
+                                if (responseType === "single") {
+                                  return (
+                                    <Form.Item
+                                      {...restField}
+                                      name={[name, "singleResponse"]}
+                                      label="Response"
+                                      rules={[
+                                        {
+                                          required: true,
+                                          message: "Response is required",
+                                        },
+                                      ]}
+                                    >
+                                      <Input placeholder="Enter response" />
+                                    </Form.Item>
+                                  );
+                                }
+
+                                return (
+                                  <>
+                                    <Form.Item
+                                      {...restField}
+                                      name={[name, "responseCount"]}
+                                      label="Number of Responses"
+                                      rules={[
+                                        {
+                                          required: true,
+                                          message: "Response count is required",
+                                        },
+                                      ]}
+                                    >
+                                      <InputNumber
+                                        min={1}
+                                        max={10}
+                                        placeholder="Enter count"
+                                        className="w-full"
+                                      />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                      noStyle
+                                      dependencies={[
+                                        ["subQuestions", name, "responseCount"],
+                                      ]}
+                                    >
+                                      {({ getFieldValue }) => {
+                                        const responseCount =
+                                          getFieldValue([
+                                            "subQuestions",
+                                            name,
+                                            "responseCount",
+                                          ]) || 1;
+
+                                        return (
+                                          <div className="ml-4">
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                              Responses ({responseCount})
+                                            </label>
+                                            {Array.from(
+                                              { length: responseCount },
+                                              (_, index) => (
+                                                <Form.Item
+                                                  key={`sub-${name}-response-${index}`}
+                                                  {...restField}
+                                                  name={[
+                                                    name,
+                                                    "multipleResponses",
+                                                    index,
+                                                  ]}
+                                                  rules={[
+                                                    {
+                                                      required: true,
+                                                      message: `Response ${
+                                                        index + 1
+                                                      } is required`,
+                                                    },
+                                                  ]}
+                                                  className="mb-2"
+                                                >
+                                                  <Input
+                                                    placeholder={`Response ${
+                                                      index + 1
+                                                    }`}
+                                                  />
+                                                </Form.Item>
+                                              )
+                                            )}
+                                          </div>
+                                        );
+                                      }}
+                                    </Form.Item>
+                                  </>
+                                );
+                              }}
+                            </Form.Item>
+                          </div>
+                        ))}
+
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() =>
+                              add({ responseType: "single", responseCount: 1 })
+                            }
+                            block
+                            icon={<PlusOutlined />}
+                          >
+                            Add Sub Question
+                          </Button>
+                        </Form.Item>
+                      </>
+                    )}
+                  </Form.List>
+                </>
+              )
+            }
+          </Form.Item>
         </Form>
       </Modal>
     </div>
