@@ -138,15 +138,12 @@ const Section = ({ setOption }) => {
               <Form.Item
                 name="sectionNote"
                 style={{ width: "100%" }}
-                label={<span className="text-lg font-bold">Description</span>}
+                label={<span className="text-lg font-bold">Note</span>}
                 rules={[
                   { required: true, message: "This field cannot be empty" },
                 ]}
               >
-                <TextArea
-                  placeholder="Enter description"
-                  style={{ width: "100%" }}
-                />
+                <TextArea placeholder="Enter notes" style={{ width: "100%" }} />
               </Form.Item>
             </Form>
           </Modal>

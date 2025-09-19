@@ -16,6 +16,7 @@ import {
   Switch,
 } from "antd";
 import React, { useState } from "react";
+
 const { Option } = Select;
 
 const Questions = ({ setOption }) => {
@@ -28,6 +29,15 @@ const Questions = ({ setOption }) => {
     { sectionId: "1", sectionName: "General Information" },
     { sectionId: "2", sectionName: "Technical Skills" },
     { sectionId: "3", sectionName: "Experience" },
+  ];
+
+  // Response options for the select dropdowns
+  const responseOptions = [
+    { value: "text", label: "Text" },
+    { value: "date", label: "Date" },
+    { value: "time", label: "Time" },
+    { value: "location", label: "Location" },
+    { value: "checkbox", label: "Checkbox" },
   ];
 
   const handleModalOk = () => {
@@ -71,7 +81,7 @@ const Questions = ({ setOption }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full p-3 bg-gray-100  -z-100">
+    <div className="flex flex-col w-full h-full p-3 bg-gray-100 -z-100">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-lg md:text-3xl font-semibold">Create Questions</h1>
         <Button
@@ -143,10 +153,12 @@ const Questions = ({ setOption }) => {
                           ?.sectionName
                       }
                     </div>
-                    <div className="text-sm text-gray-600 mb-3">
-                      Response Type: {question.responseType} | Responses:{" "}
-                      {question.responses.length}
-                    </div>
+                    {question.responseType && (
+                      <div className="text-sm text-gray-600 mb-3">
+                        Response Type: {question.responseType} | Responses:{" "}
+                        {question.responses.length}
+                      </div>
+                    )}
                     {question.isHeading && question.subQuestions.length > 0 && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700">
@@ -174,6 +186,7 @@ const Questions = ({ setOption }) => {
             </div>
           </div>
         )}
+
         <Modal
           title="Create New Question"
           open={openModal}
@@ -211,105 +224,145 @@ const Questions = ({ setOption }) => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item
-              name="question"
-              label={<span className="text-lg font-bold">Question</span>}
-              rules={[{ required: true, message: "Question is required" }]}
-            >
-              <Input placeholder="Enter question" size="large" />
-            </Form.Item>
+
+            <div className="flex md:flex-row flex-col">
+              <Form.Item
+                name="isHeading"
+                label="Heading Question"
+                valuePropName="checked"
+              >
+                <Switch />
+              </Form.Item>
+              <Form.Item
+                name="question"
+                style={{ width: "100%" }}
+                label={<span className="text-lg font-bold">Question</span>}
+                rules={[{ required: true, message: "Question is required" }]}
+              >
+                <Input placeholder="Enter question" size="large" />
+              </Form.Item>
+            </div>
+
             <Form.Item
               name="responseType"
               label="Response Type"
-              rules={[{ required: true, message: "Response type is required" }]}
+              dependencies={["isHeading"]}
+              rules={[
+                ({ getFieldValue }) => ({
+                  required: !getFieldValue("isHeading"),
+                  message: "Response type is required",
+                }),
+              ]}
             >
               <Radio.Group>
                 <Radio value="single">Single Response</Radio>
                 <Radio value="multiple">Multiple Responses</Radio>
               </Radio.Group>
             </Form.Item>
+
             {/* Main question responses */}
-            <Form.Item noStyle dependencies={["responseType"]}>
+            <Form.Item noStyle dependencies={["responseType", "isHeading"]}>
               {({ getFieldValue }) => {
                 const responseType = getFieldValue("responseType");
+                const isHeading = getFieldValue("isHeading");
+
                 if (responseType === "single") {
                   return (
                     <Form.Item
                       name="singleResponse"
                       label="Response"
                       rules={[
-                        { required: true, message: "Response is required" },
-                      ]}
-                    >
-                      <Input placeholder="Enter response" />
-                    </Form.Item>
-                  );
-                }
-                return (
-                  <>
-                    <Form.Item
-                      name="responseCount"
-                      label="Number of Responses"
-                      rules={[
                         {
-                          required: true,
-                          message: "Response count is required",
+                          required: !isHeading,
+                          message: "Response is required",
                         },
                       ]}
                     >
-                      <InputNumber
-                        min={1}
-                        max={10}
-                        placeholder="Enter count"
-                        className="w-full"
-                      />
+                      <Select placeholder="Select response type">
+                        {responseOptions.map((option) => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
+                          </Option>
+                        ))}
+                      </Select>
                     </Form.Item>
-                    <Form.Item noStyle dependencies={["responseCount"]}>
-                      {({ getFieldValue }) => {
-                        const responseCount =
-                          getFieldValue("responseCount") || 1;
-                        return (
-                          <div className="ml-4">
-                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                              Responses ({responseCount})
-                            </label>
-                            {Array.from(
-                              { length: responseCount },
-                              (_, index) => (
-                                <Form.Item
-                                  key={`main-response-${index}`}
-                                  name={["multipleResponses", index]}
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: `Response ${
+                  );
+                }
+
+                if (responseType === "multiple") {
+                  return (
+                    <>
+                      <Form.Item
+                        name="responseCount"
+                        label="Number of Responses"
+                        rules={[
+                          {
+                            required: !isHeading,
+                            message: "Response count is required",
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          min={1}
+                          max={10}
+                          placeholder="Enter count"
+                          className="w-full"
+                        />
+                      </Form.Item>
+                      <Form.Item noStyle dependencies={["responseCount"]}>
+                        {({ getFieldValue }) => {
+                          const responseCount =
+                            getFieldValue("responseCount") || 1;
+                          return (
+                            <div className="ml-4">
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                Responses ({responseCount})
+                              </label>
+                              {Array.from(
+                                { length: responseCount },
+                                (_, index) => (
+                                  <Form.Item
+                                    key={`main-response-${index}`}
+                                    name={["multipleResponses", index]}
+                                    rules={[
+                                      {
+                                        required: !isHeading,
+                                        message: `Response ${
+                                          index + 1
+                                        } is required`,
+                                      },
+                                    ]}
+                                    className="mb-2"
+                                  >
+                                    <Select
+                                      placeholder={`Select response ${
                                         index + 1
-                                      } is required`,
-                                    },
-                                  ]}
-                                  className="mb-2"
-                                >
-                                  <Input
-                                    placeholder={`Response ${index + 1}`}
-                                  />
-                                </Form.Item>
-                              )
-                            )}
-                          </div>
-                        );
-                      }}
-                    </Form.Item>
-                  </>
-                );
+                                      } type`}
+                                    >
+                                      {responseOptions.map((option) => (
+                                        <Option
+                                          key={option.value}
+                                          value={option.value}
+                                        >
+                                          {option.label}
+                                        </Option>
+                                      ))}
+                                    </Select>
+                                  </Form.Item>
+                                )
+                              )}
+                            </div>
+                          );
+                        }}
+                      </Form.Item>
+                    </>
+                  );
+                }
+
+                return null;
               }}
             </Form.Item>
-            <Form.Item
-              name="isHeading"
-              label="Heading Question"
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
+
             {/* Sub-questions */}
             <Form.Item noStyle dependencies={["isHeading"]}>
               {({ getFieldValue }) =>
@@ -369,6 +422,7 @@ const Questions = ({ setOption }) => {
                                   </Radio>
                                 </Radio.Group>
                               </Form.Item>
+
                               {/* Sub-question responses */}
                               <Form.Item
                                 noStyle
@@ -395,7 +449,16 @@ const Questions = ({ setOption }) => {
                                           },
                                         ]}
                                       >
-                                        <Input placeholder="Enter response" />
+                                        <Select placeholder="Select response type">
+                                          {responseOptions.map((option) => (
+                                            <Option
+                                              key={option.value}
+                                              value={option.value}
+                                            >
+                                              {option.label}
+                                            </Option>
+                                          ))}
+                                        </Select>
                                       </Form.Item>
                                     );
                                   }
@@ -463,11 +526,22 @@ const Questions = ({ setOption }) => {
                                                     ]}
                                                     className="mb-2"
                                                   >
-                                                    <Input
-                                                      placeholder={`Response ${
+                                                    <Select
+                                                      placeholder={`Select response ${
                                                         index + 1
-                                                      }`}
-                                                    />
+                                                      } type`}
+                                                    >
+                                                      {responseOptions.map(
+                                                        (option) => (
+                                                          <Option
+                                                            key={option.value}
+                                                            value={option.value}
+                                                          >
+                                                            {option.label}
+                                                          </Option>
+                                                        )
+                                                      )}
+                                                    </Select>
                                                   </Form.Item>
                                                 )
                                               )}
