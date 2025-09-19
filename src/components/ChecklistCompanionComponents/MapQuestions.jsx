@@ -9,11 +9,15 @@ import {
   Tag,
 } from "antd";
 import React, { useMemo, useState } from "react";
-import { EyeOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  EyeOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 
 const { Option } = Select;
 
-const MapQuestions = () => {
+const MapQuestions = ({ setOption }) => {
   // State for selections
   const [selectedChecklist, setSelectedChecklist] = useState(null);
   const [selectedSections, setSelectedSections] = useState([]);
@@ -343,304 +347,314 @@ const MapQuestions = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-white w-full rounded-lg max-h-[90vh] overflow-y-auto">
-      {/* Selection Form */}
-      <div className="space-y-6">
-        {/* Checklist Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Checklist
-          </label>
-          <Select
-            placeholder="Search and select a checklist"
-            style={{ width: "100%" }}
-            size="large"
-            showSearch
-            allowClear
-            value={selectedChecklist}
-            onChange={handleChecklistChange}
-            optionFilterProp="children"
-            filterOption={(input, option) => {
-              const checklist = checklists.find(
-                (c) => c.checklistId === option.key
-              );
-              if (!checklist) return false;
-
-              const searchText = input.toLowerCase();
-              const nameMatch = checklist.checklistName
-                .toLowerCase()
-                .includes(searchText);
-              return nameMatch;
-            }}
-          >
-            {checklists.map((checklist) => (
-              <Option key={checklist.checklistId} value={checklist.checklistId}>
-                <div className="py-1">
-                  <div className="font-medium text-gray-900 truncate">
-                    {checklist.checklistName}
-                  </div>
-                </div>
-              </Option>
-            ))}
-          </Select>
-
-          {/* Show selected checklist details */}
-          {selectedChecklist && (
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-blue-900 truncate">
-                    {checklistById(selectedChecklist)?.checklistName}
-                  </h3>
-                  <div className="text-sm text-blue-700 mt-1 flex flex-wrap items-center gap-2">
-                    {checklistById(selectedChecklist).metadata.map(
-                      (metadataObj, index) => (
-                        <span key={index}>
-                          {metadataObj.key} : {metadataObj.responseType}
-                        </span>
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Section Selection */}
-        {selectedChecklist && (
+    <div className="flex flex-col w-full h-full p-3 bg-gray-100  -z-100">
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-lg md:text-3xl font-semibold">
+          Map Chekclist & Sections
+        </h1>
+        <Button
+          onClick={() => setOption("viewAllChecklist")}
+          type="primary"
+          size="middle"
+          icon={<ArrowLeftOutlined />}
+        >
+          Back
+        </Button>
+      </div>
+      <div className="flex flex-col gap-6 p-6 bg-white w-full rounded-lg max-h-[90vh] overflow-y-auto">
+        {/* Selection Form */}
+        <div className="space-y-6">
+          {/* Checklist Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Sections
+              Select Checklist
             </label>
             <Select
-              mode="multiple"
-              placeholder="Search and select sections"
+              placeholder="Search and select a checklist"
               style={{ width: "100%" }}
               size="large"
               showSearch
               allowClear
-              value={selectedSections}
-              onChange={handleSectionChange}
+              value={selectedChecklist}
+              onChange={handleChecklistChange}
               optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-              maxTagCount="responsive"
+              filterOption={(input, option) => {
+                const checklist = checklists.find(
+                  (c) => c.checklistId === option.key
+                );
+                if (!checklist) return false;
+                const searchText = input.toLowerCase();
+                const nameMatch = checklist.checklistName
+                  .toLowerCase()
+                  .includes(searchText);
+                return nameMatch;
+              }}
             >
-              {sections.map((section) => (
-                <Option key={section.sectionId} value={section.sectionId}>
-                  {section.sectionName}
+              {checklists.map((checklist) => (
+                <Option
+                  key={checklist.checklistId}
+                  value={checklist.checklistId}
+                >
+                  <div className="py-1">
+                    <div className="font-medium text-gray-900 truncate">
+                      {checklist.checklistName}
+                    </div>
+                  </div>
                 </Option>
               ))}
             </Select>
-          </div>
-        )}
-
-        {/* Selected Sections Preview */}
-        {selectedSections.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Selected Sections ({selectedSections.length}) - Total Questions:{" "}
-              {getTotalQuestions()}
-            </label>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {selectedSections.map((sectionId) => {
-                const section = sectionById(sectionId);
-                return (
-                  <div
-                    key={sectionId}
-                    className="border border-gray-200 rounded-lg p-4 bg-gray-50"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 truncate">
-                          {section?.sectionName}
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                          {section?.description}
-                        </p>
-                        <div className="text-xs text-gray-500 mt-2">
-                          {section?.questionIds.length} questions included
-                        </div>
-                      </div>
-                      <Button
-                        type="text"
-                        icon={<EyeOutlined />}
-                        onClick={() => showSectionQuestions(section)}
-                        className="flex-shrink-0"
-                        size="small"
-                      >
-                        View
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Publish Button */}
-        {selectedChecklist && selectedSections.length > 0 && (
-          <div className="flex justify-end pt-4 border-t">
-            <Button
-              type="primary"
-              size="large"
-              icon={<SaveOutlined />}
-              onClick={handlePublish}
-            >
-              Publish Mapping
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Published Mappings */}
-      {publishedMappings.length > 0 && (
-        <div className="mt-8 border-t pt-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            Published Mappings
-          </h2>
-          <div className="grid gap-4 max-h-96 overflow-y-auto">
-            {publishedMappings.map((mapping, idx) => (
-              <Card
-                key={mapping.id}
-                size="small"
-                title={
-                  <div className="flex items-center justify-between">
-                    <span className="truncate">Mapping {idx + 1}</span>
-                    <span className="text-xs font-normal text-gray-500 ml-2">
-                      {mapping.publishedAt}
-                    </span>
-                  </div>
-                }
-              >
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm font-medium text-gray-700">
-                      Checklist:
-                    </div>
-                    <div className="text-base truncate">
-                      {checklistById(mapping.checklistId)?.checklistName}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">
-                      Mapped Sections ({mapping.sections.length}):
-                    </div>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {mapping.sections.map((sectionId) => {
-                        const section = sectionById(sectionId);
-                        return (
-                          <div
-                            key={sectionId}
-                            className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">
-                                {section?.sectionName}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {section?.questionIds.length} questions
-                              </div>
-                            </div>
-                            <Button
-                              type="link"
-                              size="small"
-                              icon={<EyeOutlined />}
-                              onClick={() => showSectionQuestions(section)}
-                              className="flex-shrink-0"
-                            >
-                              View
-                            </Button>
-                          </div>
-                        );
-                      })}
+            {/* Show selected checklist details */}
+            {selectedChecklist && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-blue-900 truncate">
+                      {checklistById(selectedChecklist)?.checklistName}
+                    </h3>
+                    <div className="text-sm text-blue-700 mt-1 flex flex-wrap items-center gap-2">
+                      {checklistById(selectedChecklist).metadata.map(
+                        (metadataObj, index) => (
+                          <span key={index}>
+                            {metadataObj.key} : {metadataObj.responseType}
+                          </span>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
-              </Card>
-            ))}
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {/* Questions Modal */}
-      <Modal
-        title={
-          selectedSectionForModal
-            ? `Questions in ${selectedSectionForModal.sectionName}`
-            : "Questions"
-        }
-        open={questionModalVisible}
-        onCancel={() => setQuestionModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setQuestionModalVisible(false)}>
-            Close
-          </Button>,
-        ]}
-        width={800}
-      >
-        {selectedSectionForModal && (
-          <div>
-            <p className="text-gray-600 mb-4">
-              {selectedSectionForModal.description}
-            </p>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {getSectionQuestions(selectedSectionForModal.questionIds).map(
-                (question) => (
-                  <div
-                    key={question.questionId}
-                    className="border-l-4 border-blue-200 pl-4"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium">{question.question}</h3>
-                      {question.isHeading && (
-                        <Tag color="blue">Heading Question</Tag>
-                      )}
+          {/* Section Selection */}
+          {selectedChecklist && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Sections
+              </label>
+              <Select
+                mode="multiple"
+                placeholder="Search and select sections"
+                style={{ width: "100%" }}
+                size="large"
+                showSearch
+                allowClear
+                value={selectedSections}
+                onChange={handleSectionChange}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+                maxTagCount="responsive"
+              >
+                {sections.map((section) => (
+                  <Option key={section.sectionId} value={section.sectionId}>
+                    {section.sectionName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          )}
+          {/* Selected Sections Preview */}
+          {selectedSections.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Selected Sections ({selectedSections.length}) - Total Questions:{" "}
+                {getTotalQuestions()}
+              </label>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {selectedSections.map((sectionId) => {
+                  const section = sectionById(sectionId);
+                  return (
+                    <div
+                      key={sectionId}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 truncate">
+                            {section?.sectionName}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                            {section?.description}
+                          </p>
+                          <div className="text-xs text-gray-500 mt-2">
+                            {section?.questionIds.length} questions included
+                          </div>
+                        </div>
+                        <Button
+                          type="text"
+                          icon={<EyeOutlined />}
+                          onClick={() => showSectionQuestions(section)}
+                          className="flex-shrink-0"
+                          size="small"
+                        >
+                          View
+                        </Button>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      Response Type:{" "}
-                      <span className="font-medium">
-                        {question.responseType}
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {/* Publish Button */}
+          {selectedChecklist && selectedSections.length > 0 && (
+            <div className="flex justify-end pt-4 border-t">
+              <Button
+                type="primary"
+                size="large"
+                icon={<SaveOutlined />}
+                onClick={handlePublish}
+              >
+                Publish Mapping
+              </Button>
+            </div>
+          )}
+        </div>
+        {/* Published Mappings */}
+        {publishedMappings.length > 0 && (
+          <div className="mt-8 border-t pt-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Published Mappings
+            </h2>
+            <div className="grid gap-4 max-h-96 overflow-y-auto">
+              {publishedMappings.map((mapping, idx) => (
+                <Card
+                  key={mapping.id}
+                  size="small"
+                  title={
+                    <div className="flex items-center justify-between">
+                      <span className="truncate">Mapping {idx + 1}</span>
+                      <span className="text-xs font-normal text-gray-500 ml-2">
+                        {mapping.publishedAt}
                       </span>
                     </div>
-                    <div className="text-sm">
-                      <div className="font-medium">Responses:</div>
-                      <ul className="list-disc ml-5">
-                        {question.responses.map((response, idx) => (
-                          <li key={idx}>{response}</li>
-                        ))}
-                      </ul>
+                  }
+                >
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">
+                        Checklist:
+                      </div>
+                      <div className="text-base truncate">
+                        {checklistById(mapping.checklistId)?.checklistName}
+                      </div>
                     </div>
-                    {question.subQuestions &&
-                      question.subQuestions.length > 0 && (
-                        <div className="mt-3 ml-4 border-l-2 border-gray-200 pl-3">
-                          <div className="text-sm font-medium mb-2">
-                            Sub Questions:
-                          </div>
-                          {question.subQuestions.map((subQ) => (
-                            <div key={subQ.subQuestionId} className="mb-2">
-                              <div className="text-sm font-medium">
-                                {subQ.subQuestion}
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 mb-2">
+                        Mapped Sections ({mapping.sections.length}):
+                      </div>
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {mapping.sections.map((sectionId) => {
+                          const section = sectionById(sectionId);
+                          return (
+                            <div
+                              key={sectionId}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium truncate">
+                                  {section?.sectionName}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {section?.questionIds.length} questions
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                Type: {subQ.responseType} | Responses:{" "}
-                                {subQ.responses.join(", ")}
-                              </div>
+                              <Button
+                                type="link"
+                                size="small"
+                                icon={<EyeOutlined />}
+                                onClick={() => showSectionQuestions(section)}
+                                className="flex-shrink-0"
+                              >
+                                View
+                              </Button>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                )
-              )}
+                </Card>
+              ))}
             </div>
           </div>
         )}
-      </Modal>
+        {/* Questions Modal */}
+        <Modal
+          title={
+            selectedSectionForModal
+              ? `Questions in ${selectedSectionForModal.sectionName}`
+              : "Questions"
+          }
+          open={questionModalVisible}
+          onCancel={() => setQuestionModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setQuestionModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+          width={800}
+        >
+          {selectedSectionForModal && (
+            <div>
+              <p className="text-gray-600 mb-4">
+                {selectedSectionForModal.description}
+              </p>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {getSectionQuestions(selectedSectionForModal.questionIds).map(
+                  (question) => (
+                    <div
+                      key={question.questionId}
+                      className="border-l-4 border-blue-200 pl-4"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-medium">{question.question}</h3>
+                        {question.isHeading && (
+                          <Tag color="blue">Heading Question</Tag>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-2">
+                        Response Type:{" "}
+                        <span className="font-medium">
+                          {question.responseType}
+                        </span>
+                      </div>
+                      <div className="text-sm">
+                        <div className="font-medium">Responses:</div>
+                        <ul className="list-disc ml-5">
+                          {question.responses.map((response, idx) => (
+                            <li key={idx}>{response}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      {question.subQuestions &&
+                        question.subQuestions.length > 0 && (
+                          <div className="mt-3 ml-4 border-l-2 border-gray-200 pl-3">
+                            <div className="text-sm font-medium mb-2">
+                              Sub Questions:
+                            </div>
+                            {question.subQuestions.map((subQ) => (
+                              <div key={subQ.subQuestionId} className="mb-2">
+                                <div className="text-sm font-medium">
+                                  {subQ.subQuestion}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Type: {subQ.responseType} | Responses:{" "}
+                                  {subQ.responses.join(", ")}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+        </Modal>
+      </div>
     </div>
   );
 };

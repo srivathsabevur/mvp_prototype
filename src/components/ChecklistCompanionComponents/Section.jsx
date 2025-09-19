@@ -1,4 +1,8 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   DatePicker,
@@ -11,7 +15,7 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import React, { useState } from "react";
 
-const Section = () => {
+const Section = ({ setOption }) => {
   const [sections, setSections] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [form] = Form.useForm(); // Create form instance
@@ -26,7 +30,7 @@ const Section = () => {
           {
             sectionId: crypto.randomUUID(),
             sectionName: values.sectionName,
-            sectionDescription: values.sectionDescription,
+            sectionDescription: values.sectionNote,
           },
         ]);
 
@@ -49,92 +53,105 @@ const Section = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 p-5 bg-white w-full rounded-lg max-h-[80vh] overflow-y-auto">
-      <Form layout="vertical" style={{ maxWidth: "100%" }}>
-        {sections.length === 0 ? (
-          <div className="w-full flex flex-col gap-5 justify-center items-center">
-            <Empty description="" />
-            <h1 className="text-center text-xl font-semibold">No sections</h1>
-            <Button
-              onClick={() => setOpenModal(true)}
-              size="large"
-              type="primary"
-            >
-              Create New Section
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-5">
-            <div className="flex justify-end items-center">
+    <div className="flex flex-col w-full h-full p-3 bg-gray-100  -z-100">
+      <div className="flex justify-between items-center">
+        <h1 className="text-lg md:text-3xl font-semibold mb-2">
+          Create Section
+        </h1>
+        <Button
+          onClick={() => setOption("viewAllChecklist")}
+          type="primary"
+          size="middle"
+          icon={<ArrowLeftOutlined />}
+        >
+          Back
+        </Button>
+      </div>
+      <div className="flex flex-col gap-3 p-5 bg-white w-full rounded-lg max-h-[80vh] overflow-y-auto">
+        <Form layout="vertical" style={{ maxWidth: "100%" }}>
+          {sections.length === 0 ? (
+            <div className="w-full flex flex-col gap-5 justify-center items-center">
+              <Empty description="" />
+              <h1 className="text-center text-xl font-semibold">No sections</h1>
               <Button
                 onClick={() => setOpenModal(true)}
-                icon={<PlusOutlined />}
-                className="w-fit"
+                size="large"
                 type="primary"
               >
-                Add Section
+                Create New Section
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {sections.map((section, index) => (
-                <div
-                  key={section.sectionId}
-                  className="relative w-full bg-gray-50 rounded-lg p-5 max-w-[350px]"
+          ) : (
+            <div className="flex flex-col gap-5">
+              <div className="flex justify-end items-center">
+                <Button
+                  onClick={() => setOpenModal(true)}
+                  icon={<PlusOutlined />}
+                  className="w-fit"
+                  type="primary"
                 >
-                  <div className="absolute top-0 right-0 p-3">
-                    <Button
-                      onClick={() => handleDelete(section.sectionId)}
-                      danger
-                      icon={<DeleteOutlined />}
-                    />
+                  Add Section
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {sections.map((section, index) => (
+                  <div
+                    key={section.sectionId}
+                    className="relative w-full bg-gray-50 rounded-lg p-5 max-w-[350px]"
+                  >
+                    <div className="absolute top-0 right-0 p-3">
+                      <Button
+                        onClick={() => handleDelete(section.sectionId)}
+                        danger
+                        icon={<DeleteOutlined />}
+                      />
+                    </div>
+                    <h1 className="text-lg font-medium truncate pr-12">
+                      {section.sectionName}
+                    </h1>
+                    <p className="text-base text-gray-600 leading-snug line-clamp-3">
+                      {section.sectionNote}
+                    </p>
                   </div>
-                  <h1 className="text-lg font-medium truncate pr-12">
-                    {section.sectionName}
-                  </h1>
-                  <p className="text-base text-gray-600 leading-snug line-clamp-3">
-                    {section.sectionDescription}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        <Modal
-          title="New Section"
-          closable={{ "aria-label": "Custom Close Button" }}
-          onCancel={handleCancel}
-          onOk={handleModelOk}
-          open={openModal}
-        >
-          <Form form={form} layout="vertical" style={{ width: "100%" }}>
-            <Form.Item
-              name="sectionName"
-              style={{ width: "100%" }}
-              label={<span className="text-lg font-bold">Section Name</span>}
-              rules={[
-                { required: true, message: "This field cannot be empty" },
-              ]}
-            >
-              <Input style={{ width: "100%" }} placeholder="Enter name" />
-            </Form.Item>
-
-            <Form.Item
-              name="sectionDescription"
-              style={{ width: "100%" }}
-              label={<span className="text-lg font-bold">Description</span>}
-              rules={[
-                { required: true, message: "This field cannot be empty" },
-              ]}
-            >
-              <TextArea
-                placeholder="Enter description"
+          )}
+          <Modal
+            title="New Section"
+            closable={{ "aria-label": "Custom Close Button" }}
+            onCancel={handleCancel}
+            onOk={handleModelOk}
+            open={openModal}
+          >
+            <Form form={form} layout="vertical" style={{ width: "100%" }}>
+              <Form.Item
+                name="sectionName"
                 style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-      </Form>
+                label={<span className="text-lg font-bold">Section Name</span>}
+                rules={[
+                  { required: true, message: "This field cannot be empty" },
+                ]}
+              >
+                <Input style={{ width: "100%" }} placeholder="Enter name" />
+              </Form.Item>
+              <Form.Item
+                name="sectionNote"
+                style={{ width: "100%" }}
+                label={<span className="text-lg font-bold">Description</span>}
+                rules={[
+                  { required: true, message: "This field cannot be empty" },
+                ]}
+              >
+                <TextArea
+                  placeholder="Enter description"
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Form>
+          </Modal>
+        </Form>
+      </div>
     </div>
   );
 };

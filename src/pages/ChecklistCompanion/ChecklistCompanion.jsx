@@ -2,6 +2,10 @@ import React, { Suspense, useState } from "react";
 import ViewAllChecklist from "./ViewAllChecklist";
 import CreateChecklist from "./CreateChecklist";
 import { ErrorBoundary } from "react-error-boundary";
+import Section from "../../components/ChecklistCompanionComponents/Section";
+import Questions from "../../components/ChecklistCompanionComponents/Questions";
+import MapQuestions from "../../components/ChecklistCompanionComponents/MapQuestions";
+import Metadata from "../../components/ChecklistCompanionComponents/Metadata";
 
 const ChecklistCompanion = () => {
   const [option, setOption] = useState("viewAllChecklist");
@@ -18,7 +22,28 @@ const ChecklistCompanion = () => {
       case "createChecklist":
         curOption = (
           <ErrorBoundary fallback={<div>Somethig went wrong</div>}>
-            <CreateChecklist setOption={setOption} />
+            <Metadata setOption={setOption} />
+          </ErrorBoundary>
+        );
+        break;
+      case "createSection":
+        curOption = (
+          <ErrorBoundary fallback={<div>Somethig went wrong</div>}>
+            <Section setOption={setOption} />
+          </ErrorBoundary>
+        );
+        break;
+      case "createQuestion":
+        curOption = (
+          <ErrorBoundary fallback={<div>Somethig went wrong</div>}>
+            <Questions setOption={setOption} />
+          </ErrorBoundary>
+        );
+        break;
+      case "mapSection":
+        curOption = (
+          <ErrorBoundary fallback={<div>Somethig went wrong</div>}>
+            <MapQuestions setOption={setOption} />
           </ErrorBoundary>
         );
         break;
