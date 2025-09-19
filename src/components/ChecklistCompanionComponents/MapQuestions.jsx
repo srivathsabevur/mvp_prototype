@@ -1,43 +1,84 @@
-import { Button, Checkbox, Empty, Form, Card, notification, Modal } from "antd";
+import {
+  Button,
+  Select,
+  Empty,
+  Card,
+  notification,
+  Modal,
+  Space,
+  Tag,
+} from "antd";
 import React, { useMemo, useState } from "react";
+import { EyeOutlined, SaveOutlined } from "@ant-design/icons";
+
+const { Option } = Select;
 
 const MapQuestions = () => {
-  const [form] = Form.useForm();
-  const [questionModalVisible, setQuestionModalVisible] = useState(false);
-  const [selectedSection, setSelectedSection] = useState(null);
+  // State for selections
+  const [selectedChecklist, setSelectedChecklist] = useState(null);
+  const [selectedSections, setSelectedSections] = useState([]);
 
-  // Mock checklists data with metadata
+  // Modal states
+  const [questionModalVisible, setQuestionModalVisible] = useState(false);
+  const [selectedSectionForModal, setSelectedSectionForModal] = useState(null);
+
+  // Published mappings
+  const [publishedMappings, setPublishedMappings] = useState([]);
+
+  // Mock checklists data with corrected metadata structure
   const checklists = useMemo(
     () => [
       {
         checklistId: "checklist-1",
         checklistName: "Pre-Employment Checklist",
-        metadata: {
-          category: "HR",
-          priority: "High",
-          estimatedTime: "30 mins",
-          department: "Human Resources",
-        },
+        metadata: [
+          { id: crypto.randomUUID(), key: "Timestart", responseType: "Time" },
+          { id: crypto.randomUUID(), key: "Date", responseType: "Date" },
+          {
+            id: crypto.randomUUID(),
+            key: "Time of expiry",
+            responseType: "Time",
+          },
+        ],
       },
       {
         checklistId: "checklist-2",
         checklistName: "Project Setup Checklist",
-        metadata: {
-          category: "Technical",
-          priority: "Medium",
-          estimatedTime: "45 mins",
-          department: "Engineering",
-        },
+        metadata: [
+          { id: crypto.randomUUID(), key: "Timestart", responseType: "Time" },
+          { id: crypto.randomUUID(), key: "Date", responseType: "Date" },
+          {
+            id: crypto.randomUUID(),
+            key: "Time of expiry",
+            responseType: "Time",
+          },
+        ],
       },
       {
         checklistId: "checklist-3",
         checklistName: "Quality Assurance Checklist",
-        metadata: {
-          category: "QA",
-          priority: "High",
-          estimatedTime: "60 mins",
-          department: "Quality Assurance",
-        },
+        metadata: [
+          { id: crypto.randomUUID(), key: "Timestart", responseType: "Time" },
+          { id: crypto.randomUUID(), key: "Date", responseType: "Date" },
+          {
+            id: crypto.randomUUID(),
+            key: "Time of expiry",
+            responseType: "Time",
+          },
+        ],
+      },
+      {
+        checklistId: "checklist-4",
+        checklistName: "Client Onboarding Checklist",
+        metadata: [
+          { id: crypto.randomUUID(), key: "Timestart", responseType: "Time" },
+          { id: crypto.randomUUID(), key: "Date", responseType: "Date" },
+          {
+            id: crypto.randomUUID(),
+            key: "Time of expiry",
+            responseType: "Time",
+          },
+        ],
       },
     ],
     []
@@ -66,6 +107,19 @@ const MapQuestions = () => {
         description:
           "Professional experience, education, and career history details",
         questionIds: ["q8", "q9", "q10"],
+      },
+      {
+        sectionId: "section-4",
+        sectionName: "References & Verification",
+        description:
+          "Reference checks and background verification requirements",
+        questionIds: ["q11", "q12"],
+      },
+      {
+        sectionId: "section-5",
+        sectionName: "Project Requirements",
+        description: "Technical specifications and project setup requirements",
+        questionIds: ["q13", "q14", "q15"],
       },
     ],
     []
@@ -172,280 +226,341 @@ const MapQuestions = () => {
         responses: ["AWS", "Google Cloud", "Microsoft Azure", "Others"],
         isHeading: false,
       },
+      {
+        questionId: "q11",
+        question: "Professional References",
+        responseType: "multiple",
+        responses: ["Name", "Position", "Contact"],
+        isHeading: false,
+      },
+      {
+        questionId: "q12",
+        question: "Background Check Consent",
+        responseType: "single",
+        responses: ["Yes/No"],
+        isHeading: false,
+      },
+      {
+        questionId: "q13",
+        question: "Project Scope Definition",
+        responseType: "multiple",
+        responses: ["Timeline", "Budget", "Resources"],
+        isHeading: true,
+      },
+      {
+        questionId: "q14",
+        question: "Technical Requirements",
+        responseType: "multiple",
+        responses: ["Technology Stack", "Infrastructure", "Third-party Tools"],
+        isHeading: false,
+      },
+      {
+        questionId: "q15",
+        question: "Deliverables Specification",
+        responseType: "single",
+        responses: ["Document Upload"],
+        isHeading: false,
+      },
     ],
     []
   );
 
-  // Initialize mapping with all checklists, empty sections
-  const [mapSections, setMapSections] = useState(() =>
-    checklists.map((c) => ({ checklistId: c.checklistId, sections: [] }))
-  );
-
-  // Store published mappings to render as cards below
-  const [publishedMappings, setPublishedMappings] = useState([]);
-
-  // Quick lookup helpers for rendering names by id
-  const checklistNameById = useMemo(() => {
-    const m = new Map(checklists.map((c) => [c.checklistId, c.checklistName]));
-    return (id) => m.get(id) ?? id;
+  // Lookup helpers
+  const checklistById = useMemo(() => {
+    const m = new Map(checklists.map((c) => [c.checklistId, c]));
+    return (id) => m.get(id);
   }, [checklists]);
-
-  const sectionNameById = useMemo(() => {
-    const m = new Map(sections.map((s) => [s.sectionId, s.sectionName]));
-    return (id) => m.get(id) ?? id;
-  }, [sections]);
 
   const sectionById = useMemo(() => {
     const m = new Map(sections.map((s) => [s.sectionId, s]));
     return (id) => m.get(id);
   }, [sections]);
 
-  const isChecked = (checklistId, sectionId) =>
-    !!mapSections
-      .find((m) => m.checklistId === checklistId)
-      ?.sections.includes(sectionId);
+  const getSectionQuestions = (questionIds) => {
+    return questions.filter((q) => questionIds.includes(q.questionId));
+  };
 
-  const handleCheckBox = (e, sectionId, checklistId) => {
-    const { checked } = e.target;
-    setMapSections((prev) =>
-      prev.map((entry) => {
-        if (entry.checklistId !== checklistId) return entry;
-        const exists = entry.sections.includes(sectionId);
-        const nextSections = checked
-          ? exists
-            ? entry.sections
-            : [...entry.sections, sectionId]
-          : entry.sections.filter((id) => id !== sectionId);
-        return { ...entry, sections: nextSections };
-      })
-    );
+  // Event handlers
+  const handleChecklistChange = (checklistId) => {
+    setSelectedChecklist(checklistId);
+    setSelectedSections([]); // Reset sections when checklist changes
+  };
+
+  const handleSectionChange = (sectionIds) => {
+    setSelectedSections(sectionIds);
+  };
+
+  const showSectionQuestions = (section) => {
+    setSelectedSectionForModal(section);
+    setQuestionModalVisible(true);
   };
 
   const handlePublish = () => {
-    // Include only checklists that have selected sections
-    const checklistsWithSections = mapSections.filter(
-      (m) => m.sections.length > 0
-    );
-
-    if (checklistsWithSections.length === 0) {
+    if (!selectedChecklist) {
       notification.warning({
-        message: "No Selection",
-        description:
-          "Please select at least one section before publishing the mapping.",
+        message: "No Checklist Selected",
+        description: "Please select a checklist before publishing.",
         placement: "topRight",
       });
       return;
     }
 
-    setPublishedMappings((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        publishedAt: new Date().toLocaleString(),
-        items: checklistsWithSections.map((m) => ({
-          checklistId: m.checklistId,
-          sections: [...m.sections],
-        })),
-      },
-    ]);
+    if (selectedSections.length === 0) {
+      notification.warning({
+        message: "No Sections Selected",
+        description: "Please select at least one section before publishing.",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    const newMapping = {
+      id: crypto.randomUUID(),
+      publishedAt: new Date().toLocaleString(),
+      checklistId: selectedChecklist,
+      sections: [...selectedSections],
+    };
+
+    setPublishedMappings((prev) => [...prev, newMapping]);
 
     notification.success({
       message: "Mapping Published",
-      description: `Successfully published mapping with ${checklistsWithSections.length} checklist(s).`,
+      description: `Successfully published mapping with ${selectedSections.length} section(s).`,
       placement: "topRight",
     });
 
-    // Reset selections and form on publish so all checkboxes clear
-    setMapSections(
-      checklists.map((c) => ({ checklistId: c.checklistId, sections: [] }))
-    );
-    form.resetFields();
+    // Reset form
+    setSelectedChecklist(null);
+    setSelectedSections([]);
   };
 
-  const showSectionQuestions = (section) => {
-    setSelectedSection(section);
-    setQuestionModalVisible(true);
-  };
-
-  const getSectionQuestions = (questionIds) => {
-    return questions.filter((q) => questionIds.includes(q.questionId));
+  // Get total questions count for selected sections
+  const getTotalQuestions = () => {
+    return selectedSections.reduce((total, sectionId) => {
+      const section = sectionById(sectionId);
+      return total + (section?.questionIds.length || 0);
+    }, 0);
   };
 
   return (
-    <div className="flex flex-col gap-3 p-5 bg-white w-full rounded-lg max-h-[80vh] overflow-y-auto">
-      {/* Sections Overview */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Available Sections</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {sections.map((section) => (
-            <Card
-              key={section.sectionId}
-              size="small"
-              title={section.sectionName}
-              extra={
-                <Button
-                  type="link"
-                  size="small"
-                  onClick={() => showSectionQuestions(section)}
-                >
-                  View Questions ({section.questionIds.length})
-                </Button>
-              }
-            >
-              <p className="text-sm text-gray-600">{section.description}</p>
-            </Card>
-          ))}
-        </div>
-      </div>
+    <div className="flex flex-col gap-6 p-6 bg-white w-full rounded-lg max-h-[90vh] overflow-y-auto">
+      {/* Selection Form */}
+      <div className="space-y-6">
+        {/* Checklist Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Checklist
+          </label>
+          <Select
+            placeholder="Search and select a checklist"
+            style={{ width: "100%" }}
+            size="large"
+            showSearch
+            allowClear
+            value={selectedChecklist}
+            onChange={handleChecklistChange}
+            optionFilterProp="children"
+            filterOption={(input, option) => {
+              const checklist = checklists.find(
+                (c) => c.checklistId === option.key
+              );
+              if (!checklist) return false;
 
-      <Form
-        form={form}
-        onFinish={handlePublish}
-        layout="vertical"
-        style={{ maxWidth: "100%" }}
-      >
-        {checklists.length === 0 ? (
-          <div className="w-full flex flex-col gap-5 justify-center items-center">
-            <Empty description="" />
-            <h1 className="text-center text-xl font-semibold">
-              No checklists available for mapping
-            </h1>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-xl font-bold mb-4">
-              Map Sections to Checklists
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {checklists.map((checklist) => (
-                <div
-                  key={checklist.checklistId}
-                  className="bg-gray-50 border border-black/10 rounded-lg p-5"
-                >
-                  <div className="mb-3">
-                    <h1 className="text-lg font-medium">
-                      {checklist.checklistName}
-                    </h1>
-                    <div className="text-sm text-gray-500 mt-1">
-                      <div>Category: {checklist.metadata.category}</div>
-                      <div>Priority: {checklist.metadata.priority}</div>
-                      <div>Est. Time: {checklist.metadata.estimatedTime}</div>
-                      <div>Department: {checklist.metadata.department}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col border-l-2 border-black/25 pl-3 ml-2">
-                    <div className="text-sm font-medium text-gray-700 mb-2">
-                      Select Sections:
-                    </div>
-                    {sections.map((section) => (
-                      <div
-                        key={section.sectionId}
-                        className="flex justify-start items-center gap-2 mt-1"
-                      >
-                        <Checkbox
-                          checked={isChecked(
-                            checklist.checklistId,
-                            section.sectionId
-                          )}
-                          onChange={(e) =>
-                            handleCheckBox(
-                              e,
-                              section.sectionId,
-                              checklist.checklistId
-                            )
-                          }
-                        />
-                        <div className="flex-1 flex items-center justify-between">
-                          <div>
-                            <span className="text-sm font-medium">
-                              {section.sectionName}
-                            </span>
-                            <div className="text-xs text-gray-500">
-                              {section.description}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              Questions: {section.questionIds.length}
-                            </div>
-                          </div>
-                          <Button
-                            type="link"
-                            size="small"
-                            onClick={() => showSectionQuestions(section)}
-                          >
-                            View Questions
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+              const searchText = input.toLowerCase();
+              const nameMatch = checklist.checklistName
+                .toLowerCase()
+                .includes(searchText);
+              return nameMatch;
+            }}
+          >
+            {checklists.map((checklist) => (
+              <Option key={checklist.checklistId} value={checklist.checklistId}>
+                <div className="py-1">
+                  <div className="font-medium text-gray-900 truncate">
+                    {checklist.checklistName}
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-end items-center mt-4">
-              <Button type="primary" htmlType="submit" size="large">
-                Publish Mapping
-              </Button>
-            </div>
-          </>
-        )}
-      </Form>
+              </Option>
+            ))}
+          </Select>
 
-      {/* Render published mappings as Cards below */}
+          {/* Show selected checklist details */}
+          {selectedChecklist && (
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-blue-900 truncate">
+                    {checklistById(selectedChecklist)?.checklistName}
+                  </h3>
+                  <div className="text-sm text-blue-700 mt-1 flex flex-wrap items-center gap-2">
+                    {checklistById(selectedChecklist).metadata.map(
+                      (metadataObj, index) => (
+                        <span key={index}>
+                          {metadataObj.key} : {metadataObj.responseType}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Section Selection */}
+        {selectedChecklist && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Sections
+            </label>
+            <Select
+              mode="multiple"
+              placeholder="Search and select sections"
+              style={{ width: "100%" }}
+              size="large"
+              showSearch
+              allowClear
+              value={selectedSections}
+              onChange={handleSectionChange}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+              maxTagCount="responsive"
+            >
+              {sections.map((section) => (
+                <Option key={section.sectionId} value={section.sectionId}>
+                  {section.sectionName}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        )}
+
+        {/* Selected Sections Preview */}
+        {selectedSections.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Selected Sections ({selectedSections.length}) - Total Questions:{" "}
+              {getTotalQuestions()}
+            </label>
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {selectedSections.map((sectionId) => {
+                const section = sectionById(sectionId);
+                return (
+                  <div
+                    key={sectionId}
+                    className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {section?.sectionName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {section?.description}
+                        </p>
+                        <div className="text-xs text-gray-500 mt-2">
+                          {section?.questionIds.length} questions included
+                        </div>
+                      </div>
+                      <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={() => showSectionQuestions(section)}
+                        className="flex-shrink-0"
+                        size="small"
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Publish Button */}
+        {selectedChecklist && selectedSections.length > 0 && (
+          <div className="flex justify-end pt-4 border-t">
+            <Button
+              type="primary"
+              size="large"
+              icon={<SaveOutlined />}
+              onClick={handlePublish}
+            >
+              Publish Mapping
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Published Mappings */}
       {publishedMappings.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">Published Mappings</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="mt-8 border-t pt-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            Published Mappings
+          </h2>
+          <div className="grid gap-4 max-h-96 overflow-y-auto">
             {publishedMappings.map((mapping, idx) => (
               <Card
                 key={mapping.id}
-                title={`Published Mapping ${idx + 1}`}
                 size="small"
-                extra={
-                  <span className="text-xs text-gray-500">
-                    Published: {mapping.publishedAt}
-                  </span>
+                title={
+                  <div className="flex items-center justify-between">
+                    <span className="truncate">Mapping {idx + 1}</span>
+                    <span className="text-xs font-normal text-gray-500 ml-2">
+                      {mapping.publishedAt}
+                    </span>
+                  </div>
                 }
               >
-                {mapping.items.map((item) => (
-                  <div key={item.checklistId} className="mb-4">
-                    <div className="font-medium text-base">
-                      {checklistNameById(item.checklistId)}
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">
+                      Checklist:
                     </div>
-                    <div className="text-sm text-gray-500 mb-2">
-                      {item.sections.length} section(s) mapped
+                    <div className="text-base truncate">
+                      {checklistById(mapping.checklistId)?.checklistName}
                     </div>
-                    <div className="space-y-2">
-                      {item.sections.map((sectionId) => {
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">
+                      Mapped Sections ({mapping.sections.length}):
+                    </div>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {mapping.sections.map((sectionId) => {
                         const section = sectionById(sectionId);
                         return (
                           <div
                             key={sectionId}
-                            className="border-l-4 border-blue-200 pl-3"
+                            className="flex items-center justify-between p-2 bg-gray-50 rounded"
                           >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="text-sm font-medium">
-                                  {sectionNameById(sectionId)}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {section?.questionIds.length} questions
-                                </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {section?.sectionName}
                               </div>
-                              <Button
-                                type="link"
-                                size="small"
-                                onClick={() => showSectionQuestions(section)}
-                              >
-                                View Questions
-                              </Button>
+                              <div className="text-xs text-gray-500">
+                                {section?.questionIds.length} questions
+                              </div>
                             </div>
+                            <Button
+                              type="link"
+                              size="small"
+                              icon={<EyeOutlined />}
+                              onClick={() => showSectionQuestions(section)}
+                              className="flex-shrink-0"
+                            >
+                              View
+                            </Button>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                ))}
+                </div>
               </Card>
             ))}
           </div>
@@ -455,8 +570,8 @@ const MapQuestions = () => {
       {/* Questions Modal */}
       <Modal
         title={
-          selectedSection
-            ? `Questions in ${selectedSection.sectionName}`
+          selectedSectionForModal
+            ? `Questions in ${selectedSectionForModal.sectionName}`
             : "Questions"
         }
         open={questionModalVisible}
@@ -468,11 +583,13 @@ const MapQuestions = () => {
         ]}
         width={800}
       >
-        {selectedSection && (
+        {selectedSectionForModal && (
           <div>
-            <p className="text-gray-600 mb-4">{selectedSection.description}</p>
-            <div className="space-y-4">
-              {getSectionQuestions(selectedSection.questionIds).map(
+            <p className="text-gray-600 mb-4">
+              {selectedSectionForModal.description}
+            </p>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {getSectionQuestions(selectedSectionForModal.questionIds).map(
                 (question) => (
                   <div
                     key={question.questionId}
@@ -481,9 +598,7 @@ const MapQuestions = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-medium">{question.question}</h3>
                       {question.isHeading && (
-                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                          Heading Question
-                        </span>
+                        <Tag color="blue">Heading Question</Tag>
                       )}
                     </div>
                     <div className="text-sm text-gray-600 mb-2">
