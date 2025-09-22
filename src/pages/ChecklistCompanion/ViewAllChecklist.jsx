@@ -1,4 +1,4 @@
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { Empty } from "antd";
 import React from "react";
 
@@ -62,7 +62,12 @@ const ViewAllChecklist = ({ setOption }) => {
               className="flex flex-col bg-white border border-black/10 rounded-lg gap-5 p-5 w-full transform-translate-full duration-150 ease-in hover:shadow-[0_2px_7px_rgba(0,0,0,0.2)] hover:-translate-y-0.5"
             >
               <div className="flex justify-between items-center">
-                <h1 className="text-lg font-semibold">{value.checklist}</h1>
+                <div className="flex justify-center items-center gap-2">
+                  <span className="bg-orange-50 text-[#FF9933] p-2">
+                    <UnorderedListOutlined />
+                  </span>
+                  <h1 className="text-lg font-semibold">{value.checklist}</h1>
+                </div>
                 <p className="font-medium text-gray-500">
                   #{value.checklistId}
                 </p>

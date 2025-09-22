@@ -1,5 +1,6 @@
 import {
   ArrowLeftOutlined,
+  DeleteOutlined,
   PlusOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -78,80 +79,94 @@ const Metadata = ({ setOption }) => {
               Create Metadata
             </Button>
           ) : (
-            metadata.map((item, index) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-3 p-4 border border-gray-200 rounded-lg"
-              >
-                <div className="flex gap-5">
-                  <Form.Item
-                    label={
-                      <span className="text-lg font-medium">Metadata Key</span>
-                    }
-                    style={{ width: "100%" }}
-                  >
-                    <Input
-                      value={item.key}
-                      placeholder="Enter Key"
-                      onChange={(e) =>
-                        handleMetadataChange(index, "key", e.target.value)
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={
-                      <span className="text-lg font-medium">Response Type</span>
-                    }
-                    style={{ width: "100%" }}
-                  >
-                    <Select
-                      onChange={(value) =>
-                        handleMetadataChange(index, "responseType", value)
-                      }
-                      placeholder="Select Response Type"
-                    >
-                      <Select.Option key="text" value="text">
-                        Text
-                      </Select.Option>
-                      <Select.Option key="date" value="date">
-                        Date
-                      </Select.Option>
-                      <Select.Option key="checkbox" value="checkbox">
-                        Checkbox
-                      </Select.Option>
-                      <Select.Option key="calendar" value="calendar">
-                        Calendar
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="flex gap-3">
-                  {index === metadata.length - 1 && (
-                    <Button
-                      onClick={handleAddMetadata}
-                      type="primary"
-                      icon={<PlusOutlined />}
-                    >
-                      Add Metadata
-                    </Button>
-                  )}
+            <div className="grid grid-cols-3 w-full gap-2">
+              {metadata.map((item, index) => (
+                <div
+                  key={item.id}
+                  className=" flex flex-col p-4 border border-gray-200 rounded-lg"
+                >
                   {metadata.length > 1 && (
-                    <Button onClick={() => handleRemoveMetadata(index)} danger>
-                      Remove
-                    </Button>
+                    <div className="flex justify-end items-center mb-0">
+                      <Button
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleRemoveMetadata(index)}
+                        danger
+                      />
+                    </div>
                   )}
+                  <div className="flex flex-col ">
+                    <Form.Item
+                      label={
+                        <span className="text-lg font-medium">
+                          Metadata Key
+                        </span>
+                      }
+                      style={{ width: "100%" }}
+                    >
+                      <Input
+                        value={item.key}
+                        placeholder="Enter Key"
+                        onChange={(e) =>
+                          handleMetadataChange(index, "key", e.target.value)
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={
+                        <span className="text-lg font-medium">
+                          Response Type
+                        </span>
+                      }
+                      style={{ width: "100%" }}
+                    >
+                      <Select
+                        onChange={(value) =>
+                          handleMetadataChange(index, "responseType", value)
+                        }
+                        placeholder="Select Response Type"
+                      >
+                        <Select.Option key="text" value="text">
+                          Text
+                        </Select.Option>
+                        <Select.Option key="date" value="date">
+                          Date
+                        </Select.Option>
+                        <Select.Option key="checkbox" value="checkbox">
+                          Checkbox
+                        </Select.Option>
+                        <Select.Option key="calendar" value="calendar">
+                          Calendar
+                        </Select.Option>
+                        <Select.Option key="time" value="time">
+                          Time
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
-          <Button
-            className="mt-2"
-            icon={<SaveOutlined />}
-            type="primary"
-            htmlType="submit"
-          >
-            Save
-          </Button>
+          <div className="mt-2">
+            {metadata.length > 0 && (
+              <div className="flex gap-3 ">
+                <Button
+                  onClick={handleAddMetadata}
+                  type="primary"
+                  icon={<PlusOutlined />}
+                >
+                  Add Metadata
+                </Button>
+                <Button
+                  icon={<SaveOutlined />}
+                  type="primary"
+                  htmlType="submit"
+                >
+                  Save
+                </Button>
+              </div>
+            )}
+          </div>
         </Form>
       </div>
     </div>
